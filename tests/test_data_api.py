@@ -66,7 +66,7 @@ def test_delete_policy(client):
 # Data API
 
 
-def test_create_data(client):
+def test_save_data(client):
     data = {
         "servers": [
             "a",
@@ -74,7 +74,8 @@ def test_create_data(client):
             "c",
         ]
     }
-    client.save_data("my.data", data)
+    result = client.save_data("my.data", data)
+    assert result is None
 
 
 def test_get_data(client):
@@ -98,18 +99,6 @@ def test_query(client):
         }]},
     )
     assert result["result"] == [{"i": 0, "name": "a"}]
-
-
-def test_save_data(client):
-    data = {
-        "users": [
-            "bilbo",
-            "frodo",
-            "gandalf",
-        ],
-    }
-    result = client.save_data("tolkien.characters", data)
-    assert result is None
 
 
 # Integration
