@@ -1,0 +1,214 @@
+import typing
+import json
+
+import requests
+
+from urllib import parse
+from requests.adapters import HTTPAdapter, Retry
+
+from .exceptions import (
+    Unauthorized,
+    InvalidURL,
+    ConnectionError,
+    InvalidPolicy,
+    InvalidPolicyRequest,
+    PolicyRequestError,
+    PolicyNotFound,
+)
+
+Explain = typing.Literal["notes", "fails", "full", "debug"]
+
+
+class OPAClient:
+    timeout = 15000
+
+    def __init__(self,
+                 url: str = "localhost",
+                 verify: bool = True,
+                 token: typing.Optional[str] = None):
+        self.url = self.parse_url(url)
+        self.verify = verify
+        self.token = token
+
+    def parse_url(self, url: str) -> str:
+        """Parse and perform basic validation of supplied `url`."""
+        try:
+            o = parse.urlparse(url)
+        except AttributeError:
+            raise InvalidURL("Invalid URL type.")
+
+        if not o.scheme:
+            o = parse.urlparse(f'http://{url}')
+
+        if not o.hostname:
+            raise InvalidURL("Malformed URL. Missing hostname.")
+
+        if o.scheme not in ['http', 'https']:
+            raise InvalidURL(f"Invalid scheme '{o.scheme}'.")
+
+        return parse.urlunparse([o.scheme, o.netloc, o.path, None, None, None])
+
+    def request(self, verb, path, *args, **kwargs) -> requests.Response:
+        """Make a request to OPA server."""
+
+        headers = {}
+        if self.token is not None:
+            headers["Authorization"] = f"Bearer {self.token}"
+
+        url = parse.urljoin(self.url, path)
+
+        try:
+            updated_kwargs = dict(
+                kwargs,
+                headers=headers,
+                timeout=self.timeout,
+                verify=self.verify,
+            )
+            return requests.request(verb, url, **updated_kwargs)
+        except requests.exceptions.ConnectionError:
+            raise ConnectionError("Unable to connect to OPA server.")
+
+    # check_permission
+    # check_policy_rule
+
+    def check_health(self) -> None:
+        with requests.Session() as s:
+            headers = {}
+            if self.token is not None:
+                headers["Authorization"] = f"Bearer {self.token}"
+
+            url = parse.urljoin(self.url, '/health')
+
+            retries = Retry(total=10, backoff_factor=0.2)
+            s.mount(url, HTTPAdapter(max_retries=retries))
+
+            try:
+                resp = s.get(url, headers=headers)
+            except requests.exceptions.ConnectionError:
+                raise ConnectionError("Unable to connect to OPA server.")
+
+            if not resp.ok:
+                raise ConnectionError("Connection not healthy.")
+
+    # Data API
+
+    def check_policy(self,
+                     input: dict,
+                     package: str,
+                     raw: bool = False,
+                     pretty: bool = False,
+                     provenance: bool = False,
+                     instrument: bool = False,
+                     strict: bool = False,
+                     explain: typing.Optional[Explain] = None,
+                     metrics: bool = False) -> dict:
+        """Get decision for a named policy."""
+        path = package.replace(".", "/").lstrip("/")
+        path = parse.urljoin("/v1/data/", path)
+
+        params: dict[str, bool | Explain] = {}
+        if pretty:
+            params['pretty'] = True
+        if provenance:
+            params['provenance'] = True
+        if instrument:
+            params['instrument'] = True
+        if strict:
+            params['strict'] = True
+        if metrics:
+            params['metrics'] = True
+        if explain is not None:
+            params['explain'] = explain
+        if params:
+            raw = True
+
+        resp = self.request(
+            "post",
+            path,
+            "/v1/data",
+            json={"input": input},
+            params=params,
+        )
+
+        if resp.ok:
+            decision = resp.json()
+            if raw:
+                return decision
+            if 'result' in decision:
+                return decision['result']
+            # OPA responds with a successful response even if there's no
+            # default policy and the package doesn't exist. We treat that as
+            # an error.
+            raise PolicyNotFound(f"Policy matching '{package}' not found.")
+
+        raise PolicyRequestError(resp.json())
+
+    def save_data(self, package: str, data: dict):
+        path = package.replace(".", "/").lstrip("/")
+        path = parse.urljoin("/v1/data/", path)
+        resp = self.request(
+            "put",
+            path,
+            "/v1/data",
+            json=data,
+        )
+
+    def get_data(self, package: str):
+        path = package.replace(".", "/").lstrip("/")
+        path = parse.urljoin("/v1/data/", path)
+        resp = self.request(
+            "get",
+            path,
+            "/v1/data",
+        )
+        if resp.ok:
+            return resp.json()["result"]
+
+    # Policy API
+
+    def list_policies(self):
+        path = "/v1/policies"
+        resp = self.request("get", path)
+
+        if resp.ok:
+            return resp.json()['result']
+
+        raise ConnectionError("Unable to retrieve policies.")
+
+    def save_policy(self, id, policy):
+        path = parse.urljoin("/v1/policies/", id)
+        resp = self.request("put", path, data=policy)
+
+        if resp.ok:
+            return resp.json()
+        if resp.status_code == 400:
+            raise InvalidPolicy(resp.json())
+
+        raise ConnectionError("Unable to save policy.")
+
+    def delete_policy(self, id):
+        path = parse.urljoin("/v1/policies/", id)
+        resp = self.request("delete", path)
+
+        if resp.ok:
+            return resp.json()
+        if resp.status_code == 404:
+            raise PolicyNotFound(resp.json())
+
+        raise ConnectionError("Unable to delete policy.")
+
+    # Query API
+
+    def query(self, query: str, input: dict, pretty: bool = False):
+        body = {
+            "query": query,
+            "input": input,
+        }
+        resp = self.request("post", "/v1/query", json=body)
+
+        if resp.ok:
+            return resp.json()
+        if resp.status_code == 400:
+            raise InvalidPolicy(resp.json())
+
+        raise ConnectionError("Unable to evaluate query.")

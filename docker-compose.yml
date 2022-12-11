@@ -1,0 +1,19 @@
+version: "3.8"
+   
+services:
+  opa:
+    image: openpolicyagent/opa:0.40.0-rootless
+    ports:
+      - "8181:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--log-format=json-pretty"
+      - "--set=decision_logs.console=true"
+
+  testrunner:
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      - opa
