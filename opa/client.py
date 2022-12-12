@@ -96,10 +96,13 @@ class OPAClient:
             except requests.exceptions.ConnectionError:
                 raise ConnectionError("Unable to connect to OPA server.")
 
+            if resp.ok:
+                return resp.json()
+
             if resp.status_code == 401:
                 raise Unauthorized(resp.json())
-            if not resp.ok:
-                raise ConnectionError("Connection not healthy.")
+
+            raise ConnectionError("Connection not healthy.")
 
     # Data API
 
