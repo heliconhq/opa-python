@@ -1,10 +1,10 @@
 # OPA Python
 
-Pythong client library for Open Policy Framework (OPA).
+Python client library for Open Policy Framework (OPA).
 
 ## Installation
 
-opa-python is available on PyPi and can be installed with pip:
+`opa-python` is available on PyPi and can be installed with pip:
 
     pip install opa-python
     
@@ -54,7 +54,7 @@ Check the policy:
 
     client.check_policy({"name": "bilbo"}, "my.policy.allow")
 
-Or with another input value:
+With another input value:
 
     client.check_policy({"name": "sauron"}, "my.policy.allow")
 
