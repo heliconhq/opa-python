@@ -41,3 +41,13 @@ Run the tests:
 Run specific test module:
 
     poetry run pytest tests/test_integration.py
+    
+## Publishing
+
+Set your credentials:
+
+    poetry config pypi-token.pypi <token>
+
+Build and publish:
+
+    poetry publish --build
