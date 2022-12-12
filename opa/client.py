@@ -162,7 +162,7 @@ class OPAClient:
 
     def delete_document(self, package: str) -> dict:
         path = parse.urljoin("/v1/data/", self.package_path(package))
-        resp = self.request("delete", package)
+        resp = self.request("delete", path)
 
         if resp.ok:
             return {}
@@ -179,7 +179,10 @@ class OPAClient:
             "/v1/data",
         )
         if resp.ok:
-            return resp.json()["result"]
+            document = resp.json()
+            if "result" in document:
+                return document["result"]
+            raise DocumentNotFound(f"Document not found at '{package}'.")
 
     # Policy API
 
