@@ -8,7 +8,7 @@ TBA.
 
 ## Usage
 
-See tests for now :)
+See `./tests` for now :)
 
 ## Running the test suite
 
@@ -32,3 +32,7 @@ Install the deps:
 Run the tests:
 
     pytest
+    
+Run specific test module:
+
+    pytest tests/test_integration.py
