@@ -23,40 +23,56 @@ The library has been tested with:
 
 Create a client instance:
 
-    from opa import OPAClient
-    client = OPAClient(url="http://opa-server/")
+```python
+from opa import OPAClient
+client = OPAClient(url="http://opa-server/")
+```
+
+Verify that the OPA server is up and ready to accept requests:
+
+```python
+client.check_health()
+```
     
 Create or update a document:
 
-    data = {
-        "users": [
-            "bilbo",
-            "frodo",
-            "gandalf",
-        ],
-    }
-    client.save_document("my.data", data)
+```python
+data = {
+    "users": [
+        "bilbo",
+        "frodo",
+        "gandalf",
+    ],
+}
+client.save_document("my.data", data)
+```
     
 Create or update a policy:
 
-    policy = """
-    package my.policy
+```python
+policy = """
+package my.policy
 
-    default allow := false
+default allow := false
 
-    allow {
-        data.my.data.users[_] = input.name
-    }
-    """
-    client.save_policy("policy-id", policy)
+allow {
+    data.my.data.users[_] = input.name
+}
+"""
+client.save_policy("policy-id", policy)
+```
     
 Check the policy:
 
-    client.check_policy({"name": "bilbo"}, "my.policy.allow")
+```python
+client.check_policy({"name": "bilbo"}, "my.policy.allow")
+```
 
 With another input value:
 
-    client.check_policy({"name": "sauron"}, "my.policy.allow")
+```python
+client.check_policy({"name": "sauron"}, "my.policy.allow")
+```
 
 We're working on the documentation. Please refer to the tests or source code
 in the meantime.
