@@ -62,15 +62,10 @@ allow {
 client.save_policy("policy-id", policy)
 ```
     
-Check the policy:
+Request decisions by evaluating input against the policy and data:
 
 ```python
 client.check_policy({"name": "bilbo"}, "my.policy.allow")
-```
-
-With another input value:
-
-```python
 client.check_policy({"name": "sauron"}, "my.policy.allow")
 ```
 
