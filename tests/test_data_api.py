@@ -50,6 +50,12 @@ def test_list_again(client):
     assert len(policies) == 1
 
 
+def test_get_policy(client):
+    policy = client.get_policy("id")
+    assert "ast" in policy
+    assert policy["id"] == "id"
+
+
 def test_delete_policy(client):
     client.delete_policy("id")
     policies = client.list_policies()

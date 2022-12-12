@@ -192,6 +192,17 @@ class OPAClient:
 
         raise ConnectionError("Unable to retrieve policies.")
 
+    def get_policy(self, id):
+        path = parse.urljoin("/v1/policies/", id)
+        resp = self.request("get", path)
+
+        if resp.ok:
+            return resp.json()["result"]
+        if resp.status_code == 404:
+            raise PolicyNotFound(resp.json())
+
+        raise ConnectionError("Unable to get policy.")
+
     def save_policy(self, id, policy):
         path = parse.urljoin("/v1/policies/", id)
         resp = self.request("put", path, data=policy)
