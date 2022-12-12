@@ -149,17 +149,29 @@ def test_delete_document(client):
 
 def test_query(client):
     query = """
-    input.servers[_].protocol = \"http\"
+    input.servers[i].protocol = \"http\"
     input.servers[i].name = name
     """
     result = client.query(
         query,
-        {"servers": [{
-            "name": "a",
-            "protocol": "http"
-        }]},
+        {
+            "servers": [
+                {
+                    "name": "a",
+                    "protocol": "http"
+                },
+                {
+                    "name": "b",
+                    "protocol": "http"
+                },
+                {
+                    "name": "c",
+                    "protocol": "ftp"
+                },
+            ]
+        },
     )
-    assert result["result"] == [{"i": 0, "name": "a"}]
+    assert len(result["result"]) == 2
 
 
 # Integration
