@@ -28,3 +28,7 @@ class PolicyRequestError(OPAException):
 
 class PolicyNotFound(OPAException):
     pass
+
+
+class DocumentNotFound(OPAException):
+    pass

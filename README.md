@@ -19,3 +19,4 @@ See tests for now :)
 - Are we really meant to check for decisions by using a `POST` to
   `/v1/data/<package>`? Seems like a weird API.
 - Deleting a policy twice does not return a `404` from the OPA server.
+- Unable to delete documents.

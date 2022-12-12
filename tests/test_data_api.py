@@ -66,7 +66,7 @@ def test_delete_policy(client):
 # Data API
 
 
-def test_save_data(client):
+def test_save_document(client):
     data = {
         "servers": [
             "a",
@@ -74,20 +74,27 @@ def test_save_data(client):
             "c",
         ]
     }
-    result = client.save_data("my.data", data)
+    result = client.save_document("my.data", data)
     assert result is None
 
 
-def test_list_data(client):
-    result = client.list_data()
+def test_list_documents(client):
+    result = client.list_documents()
     assert "my" in result
     assert "opa" in result
 
 
-def test_get_data(client):
-    result = client.get_data("my.data")
+def test_get_document(client):
+    result = client.get_document("my.data")
     assert len(result["servers"]) == 3
 
+
+# def test_delete_document(client):
+#     result = client.get_document("my.data")
+#     assert len(result["servers"]) == 3
+#     client.delete_document("my.data")
+#     result = client.list_documents()
+#     assert "my" not in result
 
 # Query API
 
@@ -110,7 +117,7 @@ def test_query(client):
 # Integration
 
 
-def test_use_data(client):
+def test_use_document(client):
     data = {
         "users": [
             "bilbo",
@@ -118,7 +125,7 @@ def test_use_data(client):
             "gandalf",
         ],
     }
-    client.save_data("integration", data)
+    client.save_document("integration", data)
 
     policy = """
     package integration

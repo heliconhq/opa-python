@@ -14,6 +14,7 @@ from .exceptions import (
     InvalidPolicyRequest,
     PolicyRequestError,
     PolicyNotFound,
+    DocumentNotFound,
 )
 
 Explain = typing.Literal["notes", "fails", "full", "debug"]
@@ -47,6 +48,9 @@ class OPAClient:
             raise InvalidURL(f"Invalid scheme '{o.scheme}'.")
 
         return parse.urlunparse([o.scheme, o.netloc, o.path, None, None, None])
+
+    def package_path(self, package):
+        return package.replace(".", "/").lstrip("/")
 
     def request(self, verb, path, *args, **kwargs) -> requests.Response:
         """Make a request to OPA server."""
@@ -103,8 +107,7 @@ class OPAClient:
                      explain: typing.Optional[Explain] = None,
                      metrics: bool = False) -> dict:
         """Get decision for a named policy."""
-        path = package.replace(".", "/").lstrip("/")
-        path = parse.urljoin("/v1/data/", path)
+        path = parse.urljoin("/v1/data/", self.package_path(package))
 
         params: dict[str, bool | Explain] = {}
         if pretty:
@@ -143,9 +146,8 @@ class OPAClient:
 
         raise PolicyRequestError(resp.json())
 
-    def save_data(self, package: str, data: dict):
-        path = package.replace(".", "/").lstrip("/")
-        path = parse.urljoin("/v1/data/", path)
+    def save_document(self, package: str, data: dict):
+        path = parse.urljoin("/v1/data/", self.package_path(package))
         resp = self.request(
             "put",
             path,
@@ -153,14 +155,24 @@ class OPAClient:
             json=data,
         )
 
-    def list_data(self):
+    def list_documents(self):
         resp = self.request("get", "/v1/data")
         if resp.ok:
             return resp.json()["result"]
 
-    def get_data(self, package: str):
-        path = package.replace(".", "/").lstrip("/")
-        path = parse.urljoin("/v1/data/", path)
+    def delete_document(self, package: str) -> dict:
+        path = parse.urljoin("/v1/data/", self.package_path(package))
+        resp = self.request("delete", package)
+
+        if resp.ok:
+            return {}
+        if resp.status_code == 404:
+            raise DocumentNotFound("Document not found")
+
+        raise ConnectionError("Unable to delete data.")
+
+    def get_document(self, package: str):
+        path = parse.urljoin("/v1/data/", self.package_path(package))
         resp = self.request(
             "get",
             path,
