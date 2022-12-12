@@ -1,10 +1,18 @@
 # OPA Python
 
-Simple client for Open Policy Framework (OPA). Under construction :)
+Simple client for Open Policy Framework (OPA).
+
+Under construction :)
 
 ## Installation
 
-TBA.
+Using pip:
+
+    pip install opa-python
+    
+Using Poetry:
+
+    poetry add opa-python
 
 ## Usage
 
