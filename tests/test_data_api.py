@@ -78,6 +78,12 @@ def test_save_data(client):
     assert result is None
 
 
+def test_list_data(client):
+    result = client.list_data()
+    assert "my" in result
+    assert "opa" in result
+
+
 def test_get_data(client):
     result = client.get_data("my.data")
     assert len(result["servers"]) == 3

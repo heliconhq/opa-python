@@ -153,6 +153,11 @@ class OPAClient:
             json=data,
         )
 
+    def list_data(self):
+        resp = self.request("get", "/v1/data")
+        if resp.ok:
+            return resp.json()["result"]
+
     def get_data(self, package: str):
         path = package.replace(".", "/").lstrip("/")
         path = parse.urljoin("/v1/data/", path)
