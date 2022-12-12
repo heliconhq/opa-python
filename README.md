@@ -48,6 +48,7 @@ Create or update a policy:
         data.my.data.users[_] = input.name
     }
     """
+    client.save_policy("policy-id", policy)
     
 Check the policy:
 
