@@ -6,7 +6,7 @@ def test_use_document(server, client):
             "gandalf",
         ],
     }
-    client.save_document("integration", data)
+    client.save_document("my.data", data)
 
     policy = """
     package integration
@@ -14,7 +14,7 @@ def test_use_document(server, client):
     default allow := false
 
     allow {
-        data.integration.users[_] = input.name
+        data.my.data.users[_] = input.name
     }
 
     """
