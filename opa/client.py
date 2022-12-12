@@ -258,3 +258,13 @@ class OPAClient:
             raise InvalidPolicy(resp.json())
 
         raise ConnectionError("Unable to evaluate query.")
+
+    # Config API
+
+    def get_config(self):
+        resp = self.request("get", "/v1/config")
+
+        if resp.ok:
+            return resp.json()["result"]
+
+        raise ConnectionError("Unable to get configuration.")

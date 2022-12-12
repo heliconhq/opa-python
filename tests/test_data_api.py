@@ -174,6 +174,14 @@ def test_query(client):
     assert len(result["result"]) == 2
 
 
+# Config api
+
+
+def test_get_config(client):
+    config = client.get_config()
+    assert "decision_logs" in config
+
+
 # Integration
 
 
