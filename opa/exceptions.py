@@ -10,10 +10,6 @@ class ConnectionError(OPAException):
     pass
 
 
-class Unauthorized(OPAException):
-    pass
-
-
 class InvalidPolicy(OPAException):
     pass
 
