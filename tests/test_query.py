@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_query(server, client):
     query = """
     input.servers[i].protocol = \"http\"

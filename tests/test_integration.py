@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_use_document(server, client):
     data = {
         "users": [
