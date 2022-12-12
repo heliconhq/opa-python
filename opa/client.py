@@ -74,9 +74,9 @@ class OPAClient:
 
         url = parse.urljoin(self.url, path)
         kwargs = {
-            # "headers": headers,
-            # "timeout": self.timeout,
-            # "verify": self.verify,
+            "headers": headers,
+            "timeout": self.timeout,
+            "verify": self.verify,
         }
 
         if json is not None:
