@@ -73,21 +73,18 @@ class OPAClient:
             headers["Authorization"] = f"Bearer {self.token}"
 
         url = parse.urljoin(self.url, path)
-        kwargs = {
-            "headers": headers,
-            "timeout": self.timeout,
-            "verify": self.verify,
-        }
-
-        if json is not None:
-            kwargs["json"] = json
-        if data is not None:
-            kwargs["data"] = data
-        if params is not None:
-            kwargs["params"] = params
 
         try:
-            resp = requests.request(verb, url, **kwargs)
+            resp = requests.request(
+                verb,
+                url,
+                headers=headers,
+                timeout=self.timeout,
+                verify=self.verify,
+                json=json,
+                data=data,
+                params=params,
+            )
 
             if resp.status_code == 401:
                 raise Unauthorized(resp.json())
