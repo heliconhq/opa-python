@@ -56,9 +56,20 @@ def test_get_policy(client):
     assert policy["id"] == "id"
 
 
-def test_get_default_policy(client):
+def test_no_default_policy(client):
     with pytest.raises(exceptions.PolicyNotFound) as e:
-        policy = client.get_default_policy()
+        client.get_default_policy()
+
+
+def test_get_default_policy(client):
+    policy = """
+    package system
+
+    main = "welcome!"
+    """
+    client.save_policy("default", policy)
+    policy = client.get_default_policy()
+    assert policy == "welcome!"
 
 
 def test_delete_policy(client):

@@ -212,7 +212,7 @@ class OPAClient:
         resp = self.request("post", "/")
 
         if resp.ok:
-            return resp.json()["result"]
+            return resp.json()
         if resp.status_code == 404:
             raise PolicyNotFound(resp.json())
 
