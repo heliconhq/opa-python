@@ -4,13 +4,7 @@ Python client library for Open Policy Framework (OPA).
 
 ## Installation
 
-`opa-python` is available on PyPi and can be installed with pip:
-
-    pip install opa-python
-    
-Or Poetry if you prefer that:
-
-    poetry add opa-python
+    python -m pip install opa-python
     
 ## Compatibility
 
