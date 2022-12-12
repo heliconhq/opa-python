@@ -68,7 +68,12 @@ class OPAClient:
                 timeout=self.timeout,
                 verify=self.verify,
             )
-            return requests.request(verb, url, **updated_kwargs)
+            resp = requests.request(verb, url, **updated_kwargs)
+
+            if resp.status_code == 401:
+                raise Unauthorized(resp.json())
+
+            return resp
         except requests.exceptions.ConnectionError:
             raise ConnectionError("Unable to connect to OPA server.")
 
@@ -91,6 +96,8 @@ class OPAClient:
             except requests.exceptions.ConnectionError:
                 raise ConnectionError("Unable to connect to OPA server.")
 
+            if resp.status_code == 401:
+                raise Unauthorized(resp.json())
             if not resp.ok:
                 raise ConnectionError("Connection not healthy.")
 

@@ -2,3 +2,4 @@
 docker-compose.yml
 Dockerfile
 env
+.docker

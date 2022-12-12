@@ -10,6 +10,13 @@ services:
       - "--server"
       - "--log-format=json-pretty"
       - "--set=decision_logs.console=true"
+      - "--authentication=token"
+      - "--authorization=basic"
+      - "system.rego"
+    volumes:
+      - type: bind
+        source: ./.docker/system.rego
+        target: /system.rego
 
   testrunner:
     build: .

@@ -32,3 +32,7 @@ class PolicyNotFound(OPAException):
 
 class DocumentNotFound(OPAException):
     pass
+
+
+class Unauthorized(OPAException):
+    pass

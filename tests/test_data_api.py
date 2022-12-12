@@ -9,11 +9,26 @@ from opa import exceptions
 
 @pytest.fixture
 def client():
-    c = OPAClient(url='http://opa:8181/')
+    client = OPAClient(url='http://opa:8181/', token="secret")
     # We check the health first as it will wait for the OPA server to be up
     # and ready to accept requests.
-    c.check_health()
-    return c
+    client.check_health()
+    return client
+
+
+# Authorization
+
+
+def test_unauthorized_policy_list():
+    client = OPAClient(url='http://opa:8181/')
+    with pytest.raises(exceptions.Unauthorized) as e:
+        client.list_policies()
+
+
+def test_unauthorized_health():
+    client = OPAClient(url='http://opa:8181/')
+    with pytest.raises(exceptions.Unauthorized) as e:
+        client.check_health()
 
 
 # Policy API
@@ -21,7 +36,9 @@ def client():
 
 def test_no_policies(client):
     policies = client.list_policies()
-    assert len(policies) == 0
+    # Assume one policy as we include a default `system.authz` policy when OPA
+    # is started.
+    assert len(policies) == 1
 
 
 def test_create_policy(client):
@@ -37,7 +54,7 @@ def test_create_policy(client):
     """
     client.save_policy("id", policy)
     policies = client.list_policies()
-    assert len(policies) == 1
+    assert len(policies) == 2
 
 
 def test_create_empty_policy(client):
@@ -47,18 +64,13 @@ def test_create_empty_policy(client):
 
 def test_list_again(client):
     policies = client.list_policies()
-    assert len(policies) == 1
+    assert len(policies) == 2
 
 
 def test_get_policy(client):
     policy = client.get_policy("id")
     assert "ast" in policy
     assert policy["id"] == "id"
-
-
-def test_no_default_policy(client):
-    with pytest.raises(exceptions.PolicyNotFound) as e:
-        client.get_default_policy()
 
 
 def test_get_default_policy(client):
@@ -75,12 +87,12 @@ def test_get_default_policy(client):
 def test_delete_policy(client):
     policies = client.list_policies()
     # There should be two policies in the system: id and default.
-    assert len(policies) == 2
+    assert len(policies) == 3
 
     client.delete_policy("id")
 
     policies = client.list_policies()
-    assert len(policies) == 1
+    assert len(policies) == 2
 
 
 def test_delete_already_deleted_policy(client):
