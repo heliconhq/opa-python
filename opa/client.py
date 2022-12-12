@@ -203,6 +203,21 @@ class OPAClient:
 
         raise ConnectionError("Unable to get policy.")
 
+    def get_default_policy(self):
+        """Attempts to retrieve the default policy. Will raise
+        `PolicyNotFound` if no policy with the package signature `system`
+        could be found.
+
+        """
+        resp = self.request("post", "/")
+
+        if resp.ok:
+            return resp.json()["result"]
+        if resp.status_code == 404:
+            raise PolicyNotFound(resp.json())
+
+        raise ConnectionError("Unable to get default policy.")
+
     def save_policy(self, id, policy):
         path = parse.urljoin("/v1/policies/", id)
         resp = self.request("put", path, data=policy)
