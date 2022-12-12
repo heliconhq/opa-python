@@ -62,9 +62,9 @@ class OPAClient:
         self,
         verb: str,
         path: str,
-        json: typing.Optional[typing.Any] = None,
-        params: typing.Optional[typing.Any] = None,
-        data: typing.Optional[typing.Any] = None,
+        json: typing.Any = None,
+        params: typing.Any = None,
+        data: typing.Any = None,
     ) -> requests.Response:
         """Make a request to OPA server."""
 
