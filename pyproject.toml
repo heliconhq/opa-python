@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "opa-python"
+homepage = "https://github.com/heliconhq/opa-python"
+documentation = "https://github.com/heliconhq/opa-python"
+version = "0.0.1"
+description = "A Python OPA client library"
+authors = ["Gustaf Sjoberg <gs@helicon.ai>"]
+license = "MIT"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10, <4"
+requests = "^2.28.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.0"
+docker = "^6.0.1"
+mypy = "^0.991"
+types-requests = "^2.28.11.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+files = ["opa"]
+show_error_codes = true
+strict = true

@@ -20,19 +20,16 @@ Make sure you do not have any services listening to `8181` when you start the
 tests! We might add a configuration for setting the port later, or run the
 tests in Docker as well.
 
-Create and activate a new environment:
+First make sure you have [Poetry](https://python-poetry.org/) installed.
 
-    python -m venv env
-    source ./env/bin/activate
-    
-Install the deps:
+Create new environment and install the dependencies:
 
-    pip install -r requirements.txt
+    poetry install
     
 Run the tests:
 
-    pytest
+    poetry run pytest
     
 Run specific test module:
 
-    pytest tests/test_integration.py
+    poetry run pytest tests/test_integration.py
