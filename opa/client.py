@@ -24,6 +24,7 @@ QueryResponse = dict[str, typing.Any]
 Document = dict[str, typing.Any]
 Decision = dict[str, typing.Any]
 HealthReport = dict[str, typing.Any]
+Input = dict[str, typing.Any]
 
 
 class OPAClient:
@@ -93,9 +94,6 @@ class OPAClient:
         except requests.exceptions.ConnectionError:
             raise ConnectionError("Unable to connect to OPA server.")
 
-    # check_permission
-    # check_policy_rule
-
     def check_health(self) -> HealthReport:
         with requests.Session() as s:
             headers = {}
@@ -124,8 +122,8 @@ class OPAClient:
 
     def check_policy(
         self,
-        input: dict[str, typing.Any],
         package: str,
+        input: typing.Optional[Input] = None,
         raw: bool = False,
         pretty: bool = False,
         provenance: bool = False,

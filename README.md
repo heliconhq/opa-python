@@ -59,8 +59,8 @@ client.save_policy("policy-id", policy)
 Request decisions by evaluating input against the policy and data:
 
 ```python
-client.check_policy({"name": "bilbo"}, "my.policy.allow")
-client.check_policy({"name": "sauron"}, "my.policy.allow")
+client.check_policy("my.policy.allow", {"name": "bilbo"})
+client.check_policy("my.policy.allow", {"name": "sauron"})
 ```
 
 We're working on the documentation. Please refer to the tests or source code
