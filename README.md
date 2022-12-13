@@ -63,9 +63,9 @@ client.check_policy("my.policy.allow", {"name": "bilbo"})
 client.check_policy("my.policy.allow", {"name": "sauron"})
 ```
 
-We're working on the documentation. Please refer to the tests or source code
-in the meantime.
-    
+You can find the full reference in the 
+[documentation](https://opa-python.readthedocs.io/en/latest/).
+
 ## Local installation
 
 Install [Poetry](https://python-poetry.org/), create new environment and
