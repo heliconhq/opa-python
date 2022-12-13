@@ -28,3 +28,13 @@ def test_package_and_rule(server, client, policy):
 def test_metrics(server, client, policy):
     decision = client.check_policy("opa.test.allow", metrics=True)
     assert "metrics" in decision
+
+
+def test_instrument(server, client, policy):
+    decision = client.check_policy("opa.test.allow", metrics=True)
+    assert "metrics" in decision
+
+
+def test_explain(server, client, policy):
+    decision = client.check_policy("opa.test.allow", explain='notes')
+    assert "explanation" in decision

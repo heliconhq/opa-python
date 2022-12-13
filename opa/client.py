@@ -35,6 +35,7 @@ class OPAClient:
         self,
         url: str = "http://localhost:8181",
         verify: bool = True,
+        retries: int = 5,
         token: typing.Optional[str] = None,
     ):
         """Initialize a new OPA client.
@@ -45,11 +46,14 @@ class OPAClient:
             verfied or not.
         :param token: (Optional) Token used to authorize client with OPA
             server.
+        :param retries: (Optional) Number of times requests should be retried
+            before giving up.
 
         """
         self.url = self.parse_url(url)
         self.verify = verify
         self.token = token
+        self.retries = retries
 
     def parse_url(self, url: str) -> str:
         """Parse and perform basic validation of supplied `url`.
@@ -89,7 +93,7 @@ class OPAClient:
         json: typing.Any = None,
         params: typing.Any = None,
         data: typing.Any = None,
-        retries: int = 10,
+        retries: typing.Optional[int] = None,
     ) -> requests.Response:
         """Make a request to OPA server. Used primarily internally.
 
@@ -98,8 +102,7 @@ class OPAClient:
         :param json: (Optional) JSON serializable object to send.
         :param params: (Optional) Dictionary to send in the query string.
         :param data: (Optional) Arbitrary object to send.
-        :param retries: (Optional) Number of times failed connections should
-            be retried..
+        :param retries: (Optional) Override client retry setting.
 
         """
 
@@ -110,8 +113,10 @@ class OPAClient:
         url = parse.urljoin(self.url, path)
 
         with requests.Session() as s:
-            max_retries = Retry(total=retries,
-                                backoff_factor=self.backoff_factor)
+            max_retries = Retry(
+                total=retries if retries is not None else self.retries,
+                backoff_factor=self.backoff_factor,
+            )
             s.mount(url, HTTPAdapter(max_retries=max_retries))
 
             try:
@@ -138,6 +143,7 @@ class OPAClient:
         bundles: bool = False,
         plugins: bool = False,
         exclude_plugins: typing.Optional[list[str]] = None,
+        retries: typing.Optional[int] = None,
     ) -> bool:
         """Check that the connection to the OPA server is healthy.
 
@@ -145,6 +151,7 @@ class OPAClient:
         :param plugins: (Optional) Account for plugins during health check.
         :param exclude_plugins: (Optional) Plugins to exclude from check. Only
             valid if `plugins` is true.
+        :param retries: (Optional) Override client retry setting.
 
         """
         params: dict[str, bool | Explain] = {}
@@ -155,10 +162,11 @@ class OPAClient:
         if plugins and exclude_plugins is not None:
             params['exclude-plugins'] = exclude_plugins
 
-        resp = self.request('get', '/health')
+        resp = self.request('get', '/health', retries=retries)
 
         if resp.ok and not resp.json():
             return True
+
         return False
 
     def check_liveness(self) -> bool:
@@ -186,6 +194,7 @@ class OPAClient:
 
         if resp.ok and not resp.json():
             return True
+
         return False
 
         # Data API
@@ -236,12 +245,7 @@ class OPAClient:
         if params:
             raw = True
 
-        resp = self.request(
-            "post",
-            path,
-            json={"input": input},
-            params=params,
-        )
+        resp = self.request("post", path, json={"input": input}, params=params)
 
         if resp.ok:
             decision = resp.json()
