@@ -1,7 +1,7 @@
 opa-python
 ==========
 
-**opa-python** is an easy-to-use Open Policy Agant (OPA) client library for
+**opa-python** is an easy-to-use Open Policy Agent (OPA) client library for
 Python.
 
 .. toctree::
