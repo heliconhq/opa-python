@@ -38,7 +38,7 @@ class OPAClient:
 
         :param url: URL to OPA server.
         :param verify: Dictates whether SSL certificates should be verfied or
-        not.
+            not.
         :param token: Token used to authorize client with OPA server.
 
         """
