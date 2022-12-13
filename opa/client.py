@@ -29,6 +29,7 @@ Input = dict[str, typing.Any]
 
 class OPAClient:
     timeout = 15000
+    backoff_factor = 0.2
 
     def __init__(
         self,
@@ -88,6 +89,7 @@ class OPAClient:
         json: typing.Any = None,
         params: typing.Any = None,
         data: typing.Any = None,
+        retries: int = 10,
     ) -> requests.Response:
         """Make a request to OPA server. Used primarily internally.
 
@@ -96,6 +98,8 @@ class OPAClient:
         :param json: (Optional) JSON serializable object to send.
         :param params: (Optional) Dictionary to send in the query string.
         :param data: (Optional) Arbitrary object to send.
+        :param retries: (Optional) Number of times failed connections should
+            be retried..
 
         """
 
@@ -105,49 +109,79 @@ class OPAClient:
 
         url = parse.urljoin(self.url, path)
 
-        try:
-            resp = requests.request(
-                verb,
-                url,
-                headers=headers,
-                timeout=self.timeout,
-                verify=self.verify,
-                json=json,
-                data=data,
-                params=params,
-            )
-
-            if resp.status_code == 401:
-                raise Unauthorized(resp.json())
-
-            return resp
-        except requests.exceptions.ConnectionError:
-            raise ConnectionError("Unable to connect to OPA server.")
-
-    def check_health(self) -> HealthReport:
-        """Check that the connection to the OPA server is healthy."""
         with requests.Session() as s:
-            headers = {}
-            if self.token is not None:
-                headers["Authorization"] = f"Bearer {self.token}"
-
-            url = parse.urljoin(self.url, '/health')
-
-            retries = Retry(total=10, backoff_factor=0.2)
-            s.mount(url, HTTPAdapter(max_retries=retries))
+            max_retries = Retry(total=retries,
+                                backoff_factor=self.backoff_factor)
+            s.mount(url, HTTPAdapter(max_retries=max_retries))
 
             try:
-                resp = s.get(url, headers=headers)
+                resp = requests.request(
+                    verb,
+                    url,
+                    headers=headers,
+                    timeout=self.timeout,
+                    verify=self.verify,
+                    json=json,
+                    data=data,
+                    params=params,
+                )
+
+                if resp.status_code == 401:
+                    raise Unauthorized(resp.json())
+
+                return resp
             except requests.exceptions.ConnectionError:
                 raise ConnectionError("Unable to connect to OPA server.")
 
-            if resp.ok:
-                return typing.cast(HealthReport, resp.json())
+    def check_health(
+        self,
+        bundles: bool = False,
+        plugins: bool = False,
+        exclude_plugins: typing.Optional[list[str]] = None,
+    ) -> bool:
+        """Check that the connection to the OPA server is healthy.
 
-            if resp.status_code == 401:
-                raise Unauthorized(resp.json())
+        :param bundles: (Optional) Account for bundles during health check.
+        :param plugins: (Optional) Account for plugins during health check.
+        :param exclude_plugins: (Optional) Plugins to exclude from check. Only
+            valid if `plugins` is true.
 
-            raise ConnectionError("Connection not healthy.")
+        """
+        params: dict[str, bool | Explain] = {}
+        if bundles:
+            params['bundles'] = True
+        if plugins:
+            params['plugins'] = True
+        if plugins and exclude_plugins is not None:
+            params['exclude-plugins'] = exclude_plugins
+
+        resp = self.request('get', '/health')
+
+        if resp.ok and not resp.json():
+            return True
+        return False
+
+    def check_live(self) -> bool:
+        """Check liveness by running the `live` rule in the `system.health`
+        policy and making sure it returns an empty dict.
+
+        """
+        resp = self.request('get', '/health/live')
+
+        if resp.ok and not resp.json():
+            return True
+        return False
+
+    def check_ready(self) -> bool:
+        """Check readiness by running the `ready` rule in the `system.health`
+        policy and making sure it returns an empty dict.
+
+        """
+        resp = self.request('get', '/health/ready')
+
+        if resp.ok and not resp.json():
+            return True
+        return False
 
     # Data API
 

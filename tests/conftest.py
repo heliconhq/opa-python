@@ -34,6 +34,7 @@ def server():
     container = start_container([
         "run",
         "--server",
+        "--log-format=json-pretty",
         "--set=decision_logs.console=true",
         "system.rego",
     ])
