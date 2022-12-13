@@ -18,49 +18,54 @@ The library has been tested with:
 Create a client instance:
 
 ```python
-from opa import OPAClient
-client = OPAClient(url="http://opa-server/")
+>>> from opa import OPAClient
+>>> client = OPAClient(url="http://opa-server/")
 ```
 
 Verify that the OPA server is up and ready to accept requests:
 
 ```python
-client.check_health()
+>>> client.check_health()
+True
 ```
     
 Create or update a document:
 
 ```python
-data = {
-    "users": [
-        "bilbo",
-        "frodo",
-        "gandalf",
-    ],
-}
-client.save_document("my.data", data)
+>>> data = {
+...    "users": [
+...        "bilbo",
+...        "frodo",
+...        "gandalf",
+...    ],
+... }
+>>> client.save_document("my.data", data)
 ```
     
 Create or update a policy:
 
 ```python
-policy = """
-package my.policy
-
-default allow := false
-
-allow {
-    data.my.data.users[_] = input.name
-}
-"""
-client.save_policy("policy-id", policy)
+>>> policy = """
+... package my.policy
+... 
+... default allow := false
+... 
+... allow {
+...     data.my.data.users[_] = input.name
+... }
+... """
+>>> client.save_policy("policy-id", policy)
+{}
 ```
     
 Request decisions by evaluating input against the policy and data:
 
 ```python
-client.check_policy("my.policy.allow", {"name": "bilbo"})
-client.check_policy("my.policy.allow", {"name": "sauron"})
+>>> client.check_policy("my.policy.allow", {"name": "bilbo"})
+True
+
+>>> client.check_policy("my.policy.allow", {"name": "sauron"})
+False
 ```
 
 You can find the full reference in the 
