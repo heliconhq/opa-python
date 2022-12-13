@@ -2,7 +2,7 @@
 name = "opa-python"
 homepage = "https://github.com/heliconhq/opa-python"
 documentation = "https://github.com/heliconhq/opa-python"
-version = "0.0.6"
+version = "0.0.7"
 description = "A Python OPA client library"
 authors = ["Gustaf Sjoberg <gs@helicon.ai>"]
 license = "MIT"
