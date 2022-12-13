@@ -30,17 +30,20 @@ Input = dict[str, typing.Any]
 class OPAClient:
     timeout = 15000
 
-    def __init__(self,
-                 url: str = "http://localhost:8181",
-                 verify: bool = True,
-                 token: typing.Optional[str] = None):
+    def __init__(
+        self,
+        url: str = "http://localhost:8181",
+        verify: bool = True,
+        token: typing.Optional[str] = None,
+    ):
         """Initialize a new OPA client.
 
         :param url: (Optional) URL to OPA server. Defaults to
-                    ``http://localhost:8181``.
-        :param verify: (Optional) Dictates whether SSL certificates should be verfied or
-                       not.
-        :param token: (Optional) Token used to authorize client with OPA server.
+            ``http://localhost:8181``.
+        :param verify: (Optional) Dictates whether SSL certificates should be
+            verfied or not.
+        :param token: (Optional) Token used to authorize client with OPA
+            server.
 
         """
         self.url = self.parse_url(url)
@@ -167,13 +170,13 @@ class OPAClient:
         :param raw: (Optional) Whether to return the raw response or not.
         :param pretty: (Optional) Make the result pretty.
         :param provenance: (Optional) Include provenance information in the
-                           response.
+            response.
         :param instrument: (Optional) Instrument query evaluation and include
-                           details in response.
+            details in response.
         :param strict: (Optional) Treat built-in-function call errors as fatal.
         :param explain: (Optional) Include query explanation in response.
         :param metrics: (Optional) Include query performance metrics in
-                        response.
+            response.
 
         """
         path = parse.urljoin("/v1/data/", self.package_path(package))
@@ -360,7 +363,7 @@ class OPAClient:
         :param pretty: (Optional) Make the result pretty.
         :param explain: (Optional) Include query explanation in response.
         :param metrics: (Optional) Include query performance metrics in
-                        response.
+            response.
 
         """
         body = {
