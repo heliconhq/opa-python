@@ -162,24 +162,22 @@ class OPAClient:
         return False
 
     def check_liveness(self) -> bool:
-        """Check liveness by running the `live` rule in the `system.health`
-        policy exists and evaluates to true. The check will fail also if
-        there's no such rule.
+        """Check liveness by making sure the `live` rule in the
+        `system.health` policy exists and evaluates to true.
 
         """
         return self.check_custom_health_rule("live")
 
     def check_readiness(self) -> bool:
-        """Check readiness by running the `ready` rule in the `system.health`
-        policy exists and evaluates to true. The check will fail also if
-        there's no such rule.
+        """Check readiness by making sure the `ready` rule in the
+        `system.health` policy exists and evaluates to true.
 
         """
         return self.check_custom_health_rule("ready")
 
     def check_custom_health_rule(self, rule: str):
-        """Run custom check rule in the `system.health` policy. The check will
-        fail also if there's no such rule.
+        """Run custom rule in the `system.health` policy. The check will fail
+        if the rule evaluates to false or does not exist.
 
         """
         assert '/' not in rule
