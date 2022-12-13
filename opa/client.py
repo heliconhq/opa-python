@@ -6,7 +6,7 @@ import requests
 from urllib import parse
 from requests.adapters import HTTPAdapter, Retry
 
-from .exceptions import (
+from opa.exceptions import (
     Unauthorized,
     InvalidURL,
     ConnectionError,

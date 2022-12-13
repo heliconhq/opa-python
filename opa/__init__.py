@@ -1,1 +1,1 @@
-from .client import OPAClient
+from opa.client import OPAClient
