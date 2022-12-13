@@ -28,46 +28,51 @@ Create a client instance:
 
 .. code-block:: python
 
-    from opa import OPAClient
-    client = OPAClient(url="http://opa-server/")
+    >>> from opa import OPAClient
+    >>> client = OPAClient(url="http://opa-server/")
 
 Verify that the OPA server is up and ready to accept requests:
 
 .. code-block:: python
 
-    client.check_health()
+    >>> client.check_health()
+    True
     
 Create or update a document:
 
 .. code-block:: python
 
-    data = {
-        "users": [
-            "bilbo",
-            "frodo",
-            "gandalf",
-        ],
-    }
-    client.save_document("my.data", data)
+    >>> data = {
+    ...    "users": [
+    ...        "bilbo",
+    ...        "frodo",
+    ...        "gandalf",
+    ...    ],
+    ... }
+    >>> client.save_document("my.data", data)
     
 Create or update a policy:
 
 .. code-block:: python
 
-    policy = """
-    package my.policy
-
-    default allow := false
-
-    allow {
-        data.my.data.users[_] = input.name
-    }
-    """
-    client.save_policy("policy-id", policy)
+    >>> policy = """
+    ... package my.policy
+    ... 
+    ... default allow := false
+    ... 
+    ... allow {
+    ...     data.my.data.users[_] = input.name
+    ... }
+    ... """
+    >>> client.save_policy("policy-id", policy)
+    {}
     
 Request decisions by evaluating input against the policy and data:
 
 .. code-block:: python
 
-    client.check_policy("my.policy.allow", {"name": "bilbo"})
-    client.check_policy("my.policy.allow", {"name": "sauron"})
+    >>> client.check_policy("my.policy.allow", {"name": "bilbo"})
+    True
+
+    >>> client.check_policy("my.policy.allow", {"name": "sauron"})
+    False
