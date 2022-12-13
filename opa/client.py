@@ -34,6 +34,14 @@ class OPAClient:
                  url: str = "localhost",
                  verify: bool = True,
                  token: typing.Optional[str] = None):
+        """Initialize a new OPA client.
+
+        :param url: URL to OPA server.
+        :param verify: Dictates whether SSL certificates should be verfied or
+        not.
+        :param token: Token used to authorize client with OPA server.
+
+        """
         self.url = self.parse_url(url)
         self.verify = verify
         self.token = token
