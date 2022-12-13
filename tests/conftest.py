@@ -7,6 +7,8 @@ import pytest
 from opa import OPAClient
 
 AUTH_TOKEN = "secret"
+OPA_VERSION = "0.47.3"
+PORT = 8181
 
 
 def start_container(command):
@@ -14,10 +16,10 @@ def start_container(command):
     dir = os.path.dirname(os.path.realpath(__file__))
     policy_path = os.path.join(dir, "system.rego")
     container = client.containers.run(
-        "openpolicyagent/opa:0.40.0-rootless",
+        f"openpolicyagent/opa:{OPA_VERSION}-rootless",
         command,
-        ports={"8181/tcp": 8181},
-        name="opa-test",
+        ports={f"{PORT}/tcp": PORT},
+        name="opa-test-2",
         volumes=[
             f"{policy_path}:/system.rego",
         ],

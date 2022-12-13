@@ -11,7 +11,7 @@ Python client library for Open Policy Framework (OPA).
 The library has been tested with:
 
 - Python 3.10
-- OPA 0.40.0
+- OPA 0.47.3
     
 ## Usage
 
