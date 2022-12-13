@@ -31,15 +31,16 @@ class OPAClient:
     timeout = 15000
 
     def __init__(self,
-                 url: str = "localhost",
+                 url: str = "http://localhost:8181",
                  verify: bool = True,
                  token: typing.Optional[str] = None):
         """Initialize a new OPA client.
 
-        :param url: URL to OPA server.
-        :param verify: Dictates whether SSL certificates should be verfied or
-            not.
-        :param token: Token used to authorize client with OPA server.
+        :param url: (Optional) URL to OPA server. Defaults to
+                    ``http://localhost:8181``.
+        :param verify: (Optional) Dictates whether SSL certificates should be verfied or
+                       not.
+        :param token: (Optional) Token used to authorize client with OPA server.
 
         """
         self.url = self.parse_url(url)
@@ -47,7 +48,11 @@ class OPAClient:
         self.token = token
 
     def parse_url(self, url: str) -> str:
-        """Parse and perform basic validation of supplied `url`."""
+        """Parse and perform basic validation of supplied `url`.
+
+        :url: URL to parse. With or without scheme.
+
+        """
         try:
             o = parse.urlparse(url)
         except AttributeError:
@@ -65,6 +70,12 @@ class OPAClient:
         return parse.urlunparse([o.scheme, o.netloc, o.path, None, None, None])
 
     def package_path(self, package: str) -> str:
+        """Normalize and return a package path that can be used in HTTP
+        requests. Replaces '.' with '/' and strips leading slash.
+
+        :param package: Package path to normalize.
+
+        """
         return package.replace(".", "/").lstrip("/")
 
     def request(
@@ -75,7 +86,15 @@ class OPAClient:
         params: typing.Any = None,
         data: typing.Any = None,
     ) -> requests.Response:
-        """Make a request to OPA server."""
+        """Make a request to OPA server. Used primarily internally.
+
+        :param verb: The HTTP verb to use.
+        :param path: Path to make request to.
+        :param json: (Optional) JSON serializable object to send.
+        :param params: (Optional) Dictionary to send in the query string.
+        :param data: (Optional) Arbitrary object to send.
+
+        """
 
         headers = {}
         if self.token is not None:
@@ -103,6 +122,7 @@ class OPAClient:
             raise ConnectionError("Unable to connect to OPA server.")
 
     def check_health(self) -> HealthReport:
+        """Check that the connection to the OPA server is healthy."""
         with requests.Session() as s:
             headers = {}
             if self.token is not None:
@@ -140,7 +160,22 @@ class OPAClient:
         explain: typing.Optional[Explain] = None,
         metrics: bool = False,
     ) -> Decision:
-        """Get decision for a named policy."""
+        """Get a decision for the specified named policy.
+
+        :param package: Package that defines the policy. May include rule name.
+        :param input: (Optional) Python dict providing `input` for the policy.
+        :param raw: (Optional) Whether to return the raw response or not.
+        :param pretty: (Optional) Make the result pretty.
+        :param provenance: (Optional) Include provenance information in the
+                           response.
+        :param instrument: (Optional) Instrument query evaluation and include
+                           details in response.
+        :param strict: (Optional) Treat built-in-function call errors as fatal.
+        :param explain: (Optional) Include query explanation in response.
+        :param metrics: (Optional) Include query performance metrics in
+                        response.
+
+        """
         path = parse.urljoin("/v1/data/", self.package_path(package))
 
         params: dict[str, bool | Explain] = {}
@@ -151,7 +186,7 @@ class OPAClient:
         if instrument:
             params['instrument'] = True
         if strict:
-            params['strict'] = True
+            params['strict-builtin-errors'] = True
         if metrics:
             params['metrics'] = True
         if explain is not None:
@@ -180,6 +215,12 @@ class OPAClient:
         raise PolicyRequestError(resp.json())
 
     def save_document(self, package: str, data: Document) -> None:
+        """Create or update a document.
+
+        :param package: Package path used to access the data.
+        :param data: JSON serializable object containing data.
+
+        """
         path = parse.urljoin("/v1/data/", self.package_path(package))
         resp = self.request(
             "put",
@@ -188,12 +229,18 @@ class OPAClient:
         )
 
     def list_documents(self) -> list[Document]:
+        """List all available documents."""
         resp = self.request("get", "/v1/data")
         if resp.ok:
             return typing.cast(list[Document], resp.json()["result"])
         raise ConnectionError("Unable to list documents.")
 
     def delete_document(self, package: str) -> dict[str, typing.Any]:
+        """Delete a document.
+
+        :param package: Package path to the document.
+
+        """
         path = parse.urljoin("/v1/data/", self.package_path(package))
         resp = self.request("delete", path)
 
@@ -205,6 +252,11 @@ class OPAClient:
         raise ConnectionError("Unable to delete document.")
 
     def get_document(self, package: str) -> Document:
+        """Find and return a document.
+
+        :param package: Package path to the document.
+
+        """
         path = parse.urljoin("/v1/data/", self.package_path(package))
         resp = self.request("get", path)
         if resp.ok:
@@ -217,6 +269,7 @@ class OPAClient:
     # Policy API
 
     def list_policies(self) -> list[Policy]:
+        """List all policies."""
         path = "/v1/policies"
         resp = self.request("get", path)
 
@@ -226,6 +279,11 @@ class OPAClient:
         raise ConnectionError("Unable to retrieve policies.")
 
     def get_policy(self, id: str) -> Policy:
+        """Get a specific policy.
+
+        :param id: Id of the policy.
+
+        """
         path = parse.urljoin("/v1/policies/", id)
         resp = self.request("get", path)
 
@@ -252,6 +310,12 @@ class OPAClient:
         raise ConnectionError("Unable to get default policy.")
 
     def save_policy(self, id: str, policy: str) -> Policy:
+        """Create or update a policy.
+
+        :param id: Id of the policy.
+        :param policy: Policy written in rego.
+
+        """
         path = parse.urljoin("/v1/policies/", id)
         resp = self.request("put", path, data=policy)
 
@@ -263,6 +327,11 @@ class OPAClient:
         raise ConnectionError("Unable to save policy.")
 
     def delete_policy(self, id: str) -> dict[str, typing.Any]:
+        """Delete a policy.
+
+        :param id: Id of the policy.
+
+        """
         path = parse.urljoin("/v1/policies/", id)
         resp = self.request("delete", path)
 
@@ -280,12 +349,34 @@ class OPAClient:
         query: str,
         input: dict[str, typing.Any],
         pretty: bool = False,
+        explain: typing.Optional[Explain] = None,
+        metrics: bool = False,
     ) -> QueryResponse:
+        """Execute an ad-hoc query and return bindings for variables found in
+        the query.
+
+        :param query: The query to execute.
+        :param input: Python dict providing `input` for the query.
+        :param pretty: (Optional) Make the result pretty.
+        :param explain: (Optional) Include query explanation in response.
+        :param metrics: (Optional) Include query performance metrics in
+                        response.
+
+        """
         body = {
             "query": query,
             "input": input,
         }
-        resp = self.request("post", "/v1/query", json=body)
+
+        params: dict[str, bool | Explain] = {}
+        if pretty:
+            params['pretty'] = True
+        if explain is not None:
+            params['explain'] = explain
+        if metrics:
+            params['metrics'] = True
+
+        resp = self.request("post", "/v1/query", json=body, params=params)
 
         if resp.ok:
             return typing.cast(QueryResponse, resp.json())
@@ -297,6 +388,7 @@ class OPAClient:
     # Config API
 
     def get_config(self) -> Config:
+        """Return OPA's active configuration as a dict."""
         resp = self.request("get", "/v1/config")
 
         if resp.ok:

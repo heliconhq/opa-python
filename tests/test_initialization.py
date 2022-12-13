@@ -7,7 +7,7 @@ from opa import exceptions
 def test_no_args():
     """Make sure default arguments work."""
     c = OPAClient()
-    assert c.url == "http://localhost"
+    assert c.url == "http://localhost:8181"
 
 
 def test_no_scheme():

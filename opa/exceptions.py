@@ -1,34 +1,34 @@
 class OPAException(Exception):
-    pass
+    """Base exception all other `opa-client` exceptions are derived from."""
 
 
 class InvalidURL(OPAException):
-    pass
+    """The URL was somehow invalid."""
 
 
 class ConnectionError(OPAException):
-    pass
+    """Generic connection error."""
 
 
 class InvalidPolicy(OPAException):
-    pass
+    """The policy provided was not valid."""
 
 
 class InvalidPolicyRequest(OPAException):
-    pass
+    """The policy-request was not valid."""
 
 
 class PolicyRequestError(OPAException):
-    pass
+    """There was an error requesting the policy."""
 
 
 class PolicyNotFound(OPAException):
-    pass
+    """The policy could not be found."""
 
 
 class DocumentNotFound(OPAException):
-    pass
+    """The document could not be found."""
 
 
 class Unauthorized(OPAException):
-    pass
+    """The request to OPA was not authorized."""
