@@ -161,29 +161,36 @@ class OPAClient:
             return True
         return False
 
-    def check_live(self) -> bool:
+    def check_liveness(self) -> bool:
         """Check liveness by running the `live` rule in the `system.health`
-        policy and making sure it returns an empty dict.
+        policy exists and evaluates to true. The check will fail also if
+        there's no such rule.
 
         """
-        resp = self.request('get', '/health/live')
+        return self.check_custom_health_rule("live")
 
-        if resp.ok and not resp.json():
-            return True
-        return False
-
-    def check_ready(self) -> bool:
+    def check_readiness(self) -> bool:
         """Check readiness by running the `ready` rule in the `system.health`
-        policy and making sure it returns an empty dict.
+        policy exists and evaluates to true. The check will fail also if
+        there's no such rule.
 
         """
-        resp = self.request('get', '/health/ready')
+        return self.check_custom_health_rule("ready")
+
+    def check_custom_health_rule(self, rule: str):
+        """Run custom check rule in the `system.health` policy. The check will
+        fail also if there's no such rule.
+
+        """
+        assert '/' not in rule
+        assert '.' not in rule
+        resp = self.request('get', f'/health/{rule}')
 
         if resp.ok and not resp.json():
             return True
         return False
 
-    # Data API
+        # Data API
 
     def check_policy(
         self,
