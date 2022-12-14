@@ -18,7 +18,7 @@ def start_container(command):
     container = client.containers.run(
         f"openpolicyagent/opa:{OPA_VERSION}-rootless",
         command,
-        ports={f"{PORT}/tcp": PORT},
+        ports={f"8181/tcp": PORT},
         name="opa-test-2",
         volumes=[
             f"{policy_path}:/system.rego",
