@@ -268,11 +268,15 @@ class OPAClient:
 
         """
         path = parse.urljoin("/v1/data/", self.package_path(package))
-        resp = self.request(
-            "put",
-            path,
-            json=data,
-        )
+        resp = self.request("put", path, json=data)
+
+        if resp.ok:
+            return None
+
+        if resp.status_code == 400:
+            raise InvalidDocument(resp.json())
+
+        raise ConnectionError("Unable to save document.")
 
     def list_documents(self) -> list[Document]:
         """List all available documents."""

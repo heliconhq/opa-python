@@ -14,6 +14,10 @@ class InvalidPolicy(OPAException):
     """The policy provided was not valid."""
 
 
+class InvalidDocument(OPAException):
+    """The document provided was not valid."""
+
+
 class InvalidPolicyRequest(OPAException):
     """The policy-request was not valid."""
 
