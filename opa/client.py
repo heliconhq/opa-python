@@ -120,7 +120,7 @@ class OPAClient:
             s.mount(url, HTTPAdapter(max_retries=max_retries))
 
             try:
-                resp = requests.request(
+                resp = s.request(
                     verb,
                     url,
                     headers=headers,
@@ -211,20 +211,22 @@ class OPAClient:
         explain: typing.Optional[Explain] = None,
         metrics: bool = False,
     ) -> Decision:
-        """Get a decision for the specified named policy.
+        """Request a decision for the specified named policy.
 
         :param package: Package that defines the policy. May include rule name.
         :param input: (Optional) Python dict providing `input` for the policy.
-        :param raw: (Optional) Whether to return the raw response or not.
+        :param raw: (Optional) Whether to return the raw response or just use
+            the result-part of the object returned from the server.
         :param pretty: (Optional) Make the result pretty.
         :param provenance: (Optional) Include provenance information in the
-            response.
+            response. Will always return a `raw` value.
         :param instrument: (Optional) Instrument query evaluation and include
-            details in response.
+            details in response. Will always return a `raw` value.
         :param strict: (Optional) Treat built-in-function call errors as fatal.
-        :param explain: (Optional) Include query explanation in response.
+        :param explain: (Optional) Include query explanation in response. Will
+            always return a `raw` value.
         :param metrics: (Optional) Include query performance metrics in
-            response.
+            response. Will always return a `raw` value.
 
         """
         path = parse.urljoin("/v1/data/", self.package_path(package))
