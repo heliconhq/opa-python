@@ -234,28 +234,33 @@ class OPAClient:
             params['pretty'] = True
         if provenance:
             params['provenance'] = True
+            raw = True
         if instrument:
             params['instrument'] = True
+            raw = True
         if strict:
             params['strict-builtin-errors'] = True
         if metrics:
             params['metrics'] = True
+            raw = True
         if explain is not None:
             params['explain'] = explain
-        if params:
             raw = True
 
         resp = self.request("post", path, json={"input": input}, params=params)
 
         if resp.ok:
             decision = resp.json()
+
             if raw:
                 return typing.cast(Decision, decision)
+
             if 'result' in decision:
                 return typing.cast(Decision, decision['result'])
-            # OPA responds with a successful response even if there's no
-            # default policy and the package doesn't exist. We treat that as
-            # an error.
+
+            # OPA responds with a 2xx status code even when there are runtime
+            # errors or if a policy does not exist. We treat that as an error
+            # and leave it to the implementor to decide.
             raise PolicyNotFound(f"Policy matching '{package}' not found.")
 
         raise PolicyRequestError(resp.json())
